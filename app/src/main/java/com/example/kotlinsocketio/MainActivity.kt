@@ -16,6 +16,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,6 +42,9 @@ class MainActivity : ComponentActivity() {
                 val uri = URI.create("http://10.0.2.2:3001")
                 val options = IO.Options.builder().build()
                 val socket = IO.socket(uri, options)
+                var chat = remember {
+                    mutableStateListOf<String>()
+                }
                 DisposableEffect("test") {
                     socket.connect()
                     socket.on(Socket.EVENT_CONNECT) {
