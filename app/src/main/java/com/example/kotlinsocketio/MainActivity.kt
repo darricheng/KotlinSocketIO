@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,6 +30,7 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.request.get
 import io.socket.client.IO
 import io.socket.client.Socket
+import io.socket.emitter.Emitter
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import java.net.URI
@@ -42,14 +44,18 @@ class MainActivity : ComponentActivity() {
                 val uri = URI.create("http://10.0.2.2:3001")
                 val options = IO.Options.builder().build()
                 val socket = IO.socket(uri, options)
-                var chat = remember {
+                val chat = remember {
                     mutableStateListOf<String>()
                 }
                 DisposableEffect("test") {
                     socket.connect()
                     socket.on(Socket.EVENT_CONNECT) {
                         Log.w("myApp", "connected")
+                        chat.add("connected")
                     }
+                    socket.on("chat message", Emitter.Listener {
+                        chat.add(it[0] as String)
+                    })
                     onDispose {
                         socket.disconnect()
                         socket.off("connect")
@@ -96,7 +102,9 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         LazyColumn() {
-
+                            items(chat) {
+                                Text(text = it)
+                            }
                         }
                     }
                 }
